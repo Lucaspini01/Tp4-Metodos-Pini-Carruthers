@@ -87,3 +87,6 @@ plt.yscale("log")  # Escala logarítmica para visualizar mejor
 plt.legend(loc="best", fontsize=8)
 plt.grid()
 plt.show()
+
+
+#Carru daleeee
