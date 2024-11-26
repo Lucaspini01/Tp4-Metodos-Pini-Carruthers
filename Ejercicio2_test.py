@@ -104,17 +104,46 @@ for eta in etas:
     
     w_gradientes.append(w_gradiente_decreciente.copy())
 
-plt.figure(figsize=(14, 7))
-for idx, eta in enumerate(etas):
-    plt.plot(w_analiticos[idx], label=f'Analítica η = {eta_labels[idx]}')
-    plt.plot(w_gradientes[idx], linestyle='--', label=f'Gradiente η = {eta_labels[idx]}')
+# plt.figure(figsize=(14, 7))
+# for idx, eta in enumerate(etas):
+#     plt.plot(w_analiticos[idx], label=f'Analítica η = {eta_labels[idx]}')
+#     plt.plot(w_gradientes[idx], linestyle='--', label=f'Gradiente η = {eta_labels[idx]}')
 
-plt.xlabel('Parámetros')
-plt.ylabel('Valor')
-plt.title('Comparación de Parámetros: Pseudoinversa vs Gradiente Descendente')
-plt.legend()
-plt.grid(True)
+# plt.xlabel('Parámetros')
+# plt.ylabel('Valor')
+# plt.title('Comparación de Parámetros: Pseudoinversa vs Gradiente Descendente')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
+
+#///////////////////////////////////////////////////////////
+plt.figure(figsize=(12, 6))
+colors = ['blue', 'pink', 'green', 'red', 'purple']  # Colores para las tasas de aprendizaje
+markers = ['o', 's', 'D', '^', 'v']  # Marcadores para los puntos
+
+# Definir los índices de los parámetros
+parametros = np.arange(len(w_analiticos[0]))
+
+# Agregar la solución analítica de la pseudoinversa
+plt.scatter(parametros, w_analiticos[0], color='black', marker='x', label="Pseudoinversa (Analítica)", zorder=4)
+# plt.plot(parametros, w_analiticos[0], color='black', linestyle='-', linewidth=1.2, alpha=0.9)
+
+# Plot iterativo por tasa de aprendizaje
+for i, w_grad in enumerate(w_gradientes):
+    plt.scatter(parametros, w_grad, color=colors[i], marker=markers[i], label=f"Gradiente η = {eta_labels[i]}", zorder=3)
+    # plt.plot(parametros, w_grad, color=colors[i], linestyle='-', alpha=0.8)
+
+# Configuraciones del gráfico
+plt.title("Comparación de Parámetros: Pseudoinversa vs Gradiente Descendente", fontsize=14)
+plt.xlabel("Índices de Parámetros", fontsize=12)
+plt.ylabel("Valor", fontsize=12)
+plt.axhline(0, color='gray', linewidth=0.8, linestyle='--', alpha=0.6)
+plt.legend(fontsize=10, loc='best')
+plt.grid(alpha=0.3)
+plt.tight_layout()
 plt.show()
+
+#///////////////////////////////////////////////////////////
 
 # Grafico de comparacion de pseudoinversa y gradiente decreciente usando ecm
 
