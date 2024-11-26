@@ -11,7 +11,7 @@ def grad_rosenbrock(x, y, a=1, b=100):
     return np.array([df_dx, df_dy])
 
 # Implementación del algoritmo de gradiente descendente
-def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=10000, a=1, b=100):
+def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=1000, a=1, b=100):
     x, y = initial_point
     trajectory = [(x, y)]
     grad_norms = []
@@ -29,64 +29,75 @@ def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=10000, a=1
     
     return np.array(trajectory), values, grad_norms
 
-# Configuración para análisis de tasas de aprendizaje y condiciones iniciales
-learning_rates = [0.001, 0.01, 0.1, 0.2]
-initial_points = [(1.5, 1.5), (-1.5, 2.0), (0.0, 0.0)]
-tol = 1e-6
-max_iter = 10000
+# Parámetros del algoritmo
+initial_point = np.array([-2, 2])
+learning_rate = 1e-3
+tol = 1e-15
+max_iter = 80000
 
-# Visualización de trayectorias en contornos de la función
-x_range = np.linspace(-2, 2, 400)
-y_range = np.linspace(-1, 3, 400)
-X, Y = np.meshgrid(x_range, y_range)
+# Ejecución del algoritmo
+trajectory, values, grad_norms = gradient_descent(initial_point, learning_rate, tol, max_iter)
+
+# Paramtros del segundo algoritmo
+initial_point = np.array([-2,2])
+learning_rate = 1e-4
+tol = 1e-15
+max_iter = 80000
+
+# Ejecución del algoritmo
+trajectory2, values2, grad_norms2 = gradient_descent(initial_point, learning_rate, tol, max_iter)
+
+
+# Gráfica de la función de Rosenbrock
+x = np.linspace(-4, 4, 100)
+y = np.linspace(-4, 4, 100)
+X, Y = np.meshgrid(x, y)
 Z = rosenbrock(X, Y)
 
-plt.figure(figsize=(12, 8))
-plt.contour(X, Y, Z, levels=np.logspace(-1, 3, 20), cmap='viridis')
-
-for lr in learning_rates:
-    for initial_point in initial_points:
-        trajectory, _, _ = gradient_descent(initial_point, lr, tol, max_iter)
-        plt.plot(trajectory[:, 0], trajectory[:, 1], label=f"LR={lr}, Init={initial_point}")
-        plt.scatter(*trajectory[-1], label=f"Final Point LR={lr}, Init={initial_point}")
-
-plt.scatter(1, 1, color="red", label="Global Min (1, 1)", s=100)
-plt.title("Trayectorias en Contornos de la Función de Rosenbrock")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.legend(loc="best", fontsize=8)
-plt.grid()
+plt.figure(figsize=(10, 6))
+plt.contour(X, Y, Z, levels=50, cmap='viridis')
+plt.plot(*zip(*trajectory), color='red', marker='o', markersize=5)
+plt.plot(*zip(*trajectory2), color='blue', marker='o', markersize=5)
+plt.title('Función de Rosenbrock y trayectoria del gradiente descendente')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.colorbar(label='Valor de la función de Rosenbrock')
 plt.show()
 
-# Evolución del valor de la función objetivo
-plt.figure(figsize=(12, 8))
-for lr in learning_rates:
-    for initial_point in initial_points:
-        _, values, _ = gradient_descent(initial_point, lr, tol, max_iter)
-        plt.plot(values, label=f"LR={lr}, Init={initial_point}")
+# Ensure trajectory and values have the same length
+min_length = min(len(trajectory), len(values))
+trajectory = trajectory[:min_length]
+values = values[:min_length]
 
-plt.title("Evolución del Valor de la Función Objetivo")
-plt.xlabel("Iteraciones")
-plt.ylabel("f(x, y)")
-plt.yscale("log")  # Escala logarítmica para visualizar mejor
-plt.legend(loc="best", fontsize=8)
-plt.grid()
+# Ensure trajectory and values have the same length
+min_length = min(len(trajectory2), len(values2))
+trajectory2 = trajectory2[:min_length]
+values2 = values2[:min_length]
+
+
+# Debugging: Check shapes of trajectory and values
+print(f"Shape of trajectory: {len(trajectory)}")
+print(f"Shape of values: {len(values)}")
+
+# Gráficar en 3D  
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8)
+ax.set_title('Función de Rosenbrock y trayectoria del gradiente descendente')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
+#plt.show()
+
+
+#Graficar la evolucion del descenso por gradiente
+plt.figure(figsize=(10, 6))
+plt.plot(values, label='Trajectory 1', color='red')
+plt.plot(values2, label='Trajectory 2', color='blue')
+plt.yscale('log')
+plt.title('Evolución del descenso por gradiente')
+plt.xlabel('Iteración')
+plt.ylabel('Valor de la función de Rosenbrock')
+plt.legend()
 plt.show()
 
-# Magnitud del gradiente a lo largo de las iteraciones
-plt.figure(figsize=(12, 8))
-for lr in learning_rates:
-    for initial_point in initial_points:
-        _, _, grad_norms = gradient_descent(initial_point, lr, tol, max_iter)
-        plt.plot(grad_norms, label=f"LR={lr}, Init={initial_point}")
-
-plt.title("Magnitud del Gradiente a lo Largo de las Iteraciones")
-plt.xlabel("Iteraciones")
-plt.ylabel("||∇f(x, y)||")
-plt.yscale("log")  # Escala logarítmica para visualizar mejor
-plt.legend(loc="best", fontsize=8)
-plt.grid()
-plt.show()
-
-
-#Carru daleeee
