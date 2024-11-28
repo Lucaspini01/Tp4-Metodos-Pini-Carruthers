@@ -1,0 +1,51 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Definición de la función de Rosenbrock y su gradiente
+def rosenbrock(x, y):
+    return (1 - x)**2 + 100 * (y - x**2)**2
+
+def rosenbrock_grad(x, y):
+    grad_x = -2 * (1 - x) - 400 * x * (y - x**2)
+    grad_y = 200 * (y - x**2)
+    return np.array([grad_x, grad_y])
+
+# Descenso por gradiente
+def gradient_descent(alpha, start, max_iter=10000, tol=1e-6):
+    x, y = start
+    trajectory = [(x, y)]
+    for _ in range(max_iter):
+        grad = rosenbrock_grad(x, y)
+        x_new, y_new = x - alpha * grad[0], y - alpha * grad[1]
+        trajectory.append((x_new, y_new))
+        if np.linalg.norm([x_new - x, y_new - y]) < tol:
+            break
+        x, y = x_new, y_new
+    return np.array(trajectory)
+
+# Parámetros
+alphas = [0.001, 0.01, 0.1]  # Tasa de aprendizaje
+initial_points = [(-1.2, 1), (0, 0), (2, 2)]  # Puntos iniciales
+
+# Generación de gráficos
+fig, axs = plt.subplots(len(initial_points), len(alphas), figsize=(15, 10))
+x_range = np.linspace(-2, 2, 400)
+y_range = np.linspace(-1, 3, 400)
+X, Y = np.meshgrid(x_range, y_range)
+Z = rosenbrock(X, Y)
+
+for i, start in enumerate(initial_points):
+    for j, alpha in enumerate(alphas):
+        trajectory = gradient_descent(alpha, start)
+        axs[i, j].contour(X, Y, Z, levels=np.logspace(-1, 3, 20), cmap='viridis')
+        axs[i, j].plot(trajectory[:, 0], trajectory[:, 1], 'r.-', label=f"α={alpha}")
+        axs[i, j].scatter(*start, color="blue", label="Start")
+        axs[i, j].scatter(1, 1, color="green", label="Min")
+        axs[i, j].set_title(f"Start={start}, α={alpha}")
+        axs[i, j].legend()
+        axs[i, j].set_xlim([-2, 2])
+        axs[i, j].set_ylim([-1, 3])
+
+plt.tight_layout()
+plt.suptitle("Trayectorias en el descenso por gradiente para la función de Rosenbrock", y=1.02, fontsize=16)
+plt.show()

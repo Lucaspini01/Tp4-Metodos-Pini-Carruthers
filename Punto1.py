@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#Condiciones iniciales
+learning_rates = [0.001 , 0.002, 0.005]
+
 # Definición de la función de Rosenbrock y su gradiente
 def rosenbrock(x, y, a=1, b=100):
     return (a - x)**2 + b * (y - x**2)**2
@@ -30,8 +33,8 @@ def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=1000, a=1,
     return np.array(trajectory), values, grad_norms
 
 # Parámetros del algoritmo
-initial_point = np.array([-2, 2])
-learning_rate = 1e-3
+initial_point = np.array([-1.5, 1.5])
+learning_rate = learning_rates[0]
 tol = 1e-15
 max_iter = 80000
 
@@ -39,8 +42,8 @@ max_iter = 80000
 trajectory, values, grad_norms = gradient_descent(initial_point, learning_rate, tol, max_iter)
 
 # Paramtros del segundo algoritmo
-initial_point = np.array([-2,2])
-learning_rate = 1e-4
+initial_point = np.array([-1.5, 1.5])
+learning_rate = learning_rates[1]
 tol = 1e-15
 max_iter = 80000
 
@@ -53,6 +56,8 @@ x = np.linspace(-4, 4, 100)
 y = np.linspace(-4, 4, 100)
 X, Y = np.meshgrid(x, y)
 Z = rosenbrock(X, Y)
+
+#Copiar los parametro 
 
 plt.figure(figsize=(10, 6))
 plt.contour(X, Y, Z, levels=50, cmap='viridis')
@@ -87,7 +92,7 @@ ax.set_title('Función de Rosenbrock y trayectoria del gradiente descendente')
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
-#plt.show()
+plt.show()
 
 
 #Graficar la evolucion del descenso por gradiente
