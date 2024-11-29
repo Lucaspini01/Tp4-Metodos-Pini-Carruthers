@@ -14,7 +14,7 @@ def grad_rosenbrock(x, y, a=1, b=100):
     return np.array([df_dx, df_dy])
 
 # Implementación del algoritmo de gradiente descendente
-def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=1000, a=1, b=100):
+def gradient_descent(initial_point, learning_rate, tol=1e-2, max_iter=1000, a=1, b=100):
     x, y = initial_point
     trajectory = [(x, y)]
     grad_norms = []

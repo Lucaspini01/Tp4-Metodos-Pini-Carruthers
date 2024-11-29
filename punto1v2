@@ -11,7 +11,7 @@ def rosenbrock_grad(x, y):
     return np.array([grad_x, grad_y])
 
 # Descenso por gradiente
-def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=10000, a=1, b=100):
+def gradient_descent(initial_point, learning_rate, tol=1e-2, max_iter=10000, a=1, b=100):
     x, y = initial_point
     trajectory = [(x, y)]
     grad_norms = []
@@ -27,7 +27,6 @@ def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=10000, a=1
         grad_norms.append(np.linalg.norm(grad))
         values.append(rosenbrock(x, y))
         
-    
     return np.array(trajectory), values, grad_norms
 
 
@@ -75,7 +74,7 @@ def plot_trajectories(initial_points, alphas, X, Y, Z):
         
         # Adjust layout and add a super title
         fig.tight_layout(rect=[0, 0, 1, 0.92])
-        fig.suptitle("Gradient Descent Trajectories on the Rosenbrock Function", fontsize=18, y=0.98, weight='bold')
+        fig.suptitle("Trayectorias del Gradiente Descendente sobre la Funcion de Rosenbrock", fontsize=18, y=0.98, weight='bold')
         plt.savefig(f"trajectory_{i}.png")
         plt.show()
         
@@ -137,7 +136,7 @@ def plot_rosenbrock():
 def main():
     # Parámetros
     alphas = [0.001, 0.002, 0.005]  # Tasa de aprendizaje
-    initial_points = [[-1.2, 1], [0, 0], [2, 2], [-1.5, 1.5]]  # Puntos iniciales
+    initial_points = [[-1.2, 1], [0, 0], [2, 2], [-1.5, 1.5], [1.5,-0.5]]  # Puntos iniciales
 
     # Generación de gráficos
     x_range = np.linspace(-2, 2, 400)
@@ -145,11 +144,40 @@ def main():
     X, Y = np.meshgrid(x_range, y_range)
     Z = rosenbrock(X, Y)
 
-    values , grads = plot_trajectories(initial_points, alphas, X, Y, Z)
-    plot_evolution(values)
-    plot_convergence(grads)
-    plot_rosenbrock()
+    #values , grads = plot_trajectories(initial_points, alphas, X, Y, Z)
+    #plot_evolution(values)
+    #plot_convergence(grads)
+    #plot_rosenbrock()
 
 
+    # Estudio de la rapidez de convergencia
+    tolerancia = 1e-2
+    iteraciones_requeridas = []
+
+    for start in initial_points:
+        for alpha in alphas:
+            _, _, grad_norms = gradient_descent(start, alpha, tol=tolerancia)
+            iteraciones_requeridas.append(len(grad_norms))
+
+    print("Número de iteraciones requeridas para alcanzar la tolerancia fija:")
+    for i, start in enumerate(initial_points):
+        for j, alpha in enumerate(alphas):
+            print(f"Punto inicial: {start}, Tasa de aprendizaje: {alpha}, Iteraciones: {iteraciones_requeridas[i * len(alphas) + j]}")
+
+
+            # Graficar el número de iteraciones requeridas para alcanzar la tolerancia
+            fig, ax = plt.subplots(figsize=(10, 6))
+            iteraciones_requeridas = np.array(iteraciones_requeridas).reshape(len(initial_points), len(alphas))
+            
+            for i, start in enumerate(initial_points):
+                ax.plot(alphas, iteraciones_requeridas[i], marker='o', label=f'Punto inicial: {start}')
+            
+            ax.set_xlabel('Tasa de aprendizaje (α)')
+            ax.set_ylabel('Número de iteraciones')
+            ax.set_title('Número de iteraciones para alcanzar la tolerancia')
+            ax.legend()
+            ax.grid(True, linestyle="--", alpha=0.6)
+            plt.savefig(f"iteraciones_requeridas.png")
+            plt.show()
 if __name__ == "__main__":
     main()
