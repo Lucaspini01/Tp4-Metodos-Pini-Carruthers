@@ -19,58 +19,137 @@ def gradient_descent(initial_point, learning_rate, tol=1e-6, max_iter=10000, a=1
     
     for _ in range(max_iter):
         grad = rosenbrock_grad(x, y)
-        grad_norms.append(np.linalg.norm(grad))
-        values.append(rosenbrock(x, y))
         
         if np.linalg.norm(grad) < tol:  # Criterio de convergencia
             break
         x, y = np.array([x, y]) - learning_rate * grad
         trajectory.append((x, y))
+        grad_norms.append(np.linalg.norm(grad))
+        values.append(rosenbrock(x, y))
+        
     
     return np.array(trajectory), values, grad_norms
-# Parámetros
-alphas = [0.001, 0.002, 0.005]  # Tasa de aprendizaje
-initial_points = [[-1.2, 1], [0, 0], [2, 2], [-1.5, 1.5]]  # Puntos iniciales
 
-# Generación de gráficos
-fig, axs = plt.subplots(len(initial_points), len(alphas), figsize=(15, 10))
-x_range = np.linspace(-2, 2, 400)
-y_range = np.linspace(-1, 3, 400)
-X, Y = np.meshgrid(x_range, y_range)
-Z = rosenbrock(X, Y)
 
-values = {}
-for i, start in enumerate(initial_points):
+import matplotlib.pyplot as plt
+import numpy as np
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_trajectories(initial_points, alphas, X, Y, Z):
+    values = {}
+    historial_norma_gradiente = {}
+    for i, start in enumerate(initial_points):
+        fig, axs = plt.subplots(1, len(alphas), figsize=(16, 6), sharex=True, sharey=True)
+        
+        for j, alpha in enumerate(alphas):
+            # Run gradient descent
+            trajectory, values[len(values)], historial_norma_gradiente[len(historial_norma_gradiente)] = gradient_descent(start, alpha)
+            
+            # Plot contour
+            contour = axs[j].contour(X, Y, Z, levels=np.logspace(-1, 3, 20), cmap='viridis')
+            axs[j].clabel(contour, inline=True, fontsize=8, fmt="%.1f")
+            
+            # Plot trajectory
+            axs[j].plot(trajectory[:, 0], trajectory[:, 1], 'r.-', label="Trajectory")
+            axs[j].scatter(*start, color="blue", label="Start", edgecolor='black', s=100)
+            
+            # Highlight the minimum point
+            axs[j].scatter(1, 1, color="gold", edgecolor="black", s=250, marker="*", zorder=5, label="Min (1,1)")
+            axs[j].annotate("(1, 1)", xy=(1, 1), xytext=(0.8, 1.2),
+                            fontsize=10, color="gold",
+                            arrowprops=dict(facecolor='black', arrowstyle='->'))
+            
+            # Title and axis labels
+            axs[j].set_title(f"Start={start}, α={alpha}", fontsize=12)
+            axs[j].set_xlabel("x1", fontsize=10)
+            axs[j].set_ylabel("x2", fontsize=10)
+            axs[j].legend(fontsize=9, loc="upper left")
+            
+            # Grid and limits
+            axs[j].grid(True, linestyle="--", alpha=0.6)
+            axs[j].set_xlim([-2, 2])
+            axs[j].set_ylim([-1, 3])
+            axs[j].set_aspect('equal', adjustable='box')
+        
+        # Adjust layout and add a super title
+        fig.tight_layout(rect=[0, 0, 1, 0.92])
+        fig.suptitle("Gradient Descent Trajectories on the Rosenbrock Function", fontsize=18, y=0.98, weight='bold')
+        plt.savefig(f"trajectory_{i}.png")
+        plt.show()
+        
+    return values, historial_norma_gradiente
+
+
+
+def plot_evolution(values):
+    plt.figure(figsize=(10, 6))
+    plt.plot(values[0], label='Trajectory 1', color='red')
+    plt.plot(values[1], label='Trajectory 2', color='blue')
+    plt.plot(values[2], label='Trajectory 3', color='green')
+    plt.plot(values[10], label='Trajectory 4', color='orange')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.grid()
+    plt.title('Evolución del descenso por gradiente')
+    plt.xlabel('Iteración')
+    plt.ylabel('Valor de la función de Rosenbrock')
+    plt.legend()
+    plt.show()
+
+def plot_convergence(historial_norma_gradiente):
+    plt.figure(figsize=(10, 6))
     
-    for j, alpha in enumerate(alphas):
-        trajectory , values[len(values)], historial_norma_gradiente = gradient_descent(start, alpha)
-        axs[i, j].contour(X, Y, Z, levels=np.logspace(-1, 3, 20), cmap='viridis')
-        axs[i, j].plot(trajectory[:, 0], trajectory[:, 1], 'r.-', label=f"α={alpha}")
-        axs[i, j].scatter(*start, color="blue", label="Start")
-        axs[i, j].scatter(1, 1, color="green", label="Min")
-        axs[i, j].set_title(f"Start={start}, α={alpha}")
-        axs[i, j].legend()
-        axs[i, j].set_xlim([-2, 2])
-        axs[i, j].set_ylim([-1, 3])
+    plt.plot(historial_norma_gradiente[3], label='Trajectory 1', color='red')
+    plt.plot(historial_norma_gradiente[4], label='Trajectory 1', color='blue')
+    plt.plot(historial_norma_gradiente[5], label='Trajectory 1', color='green')
+    plt.grid()
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.title('Convergencia de las trayectorias al mínimo')
+    plt.xlabel('Iteración')
+    plt.ylabel('Norma del gradiente')
+    plt.legend()
+    plt.show()
 
-plt.tight_layout()
-plt.suptitle("Trayectorias en el descenso por gradiente para la función de Rosenbrock", y=1.02, fontsize=16)
-plt.show()
+def plot_rosenbrock():
+    # Gráfica de la función de Rosenbrock
+    x = np.linspace(-4, 4, 100)
+    y = np.linspace(-4, 4, 100)
+    X, Y = np.meshgrid(x, y)
+    Z = rosenbrock(X, Y)
 
-print(len(values))
+   # Gráficar en 3D  
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8)
+    ax.scatter(1, 1, rosenbrock(1, 1), color='red', s=100, label='Min (1,1)')
+    ax.set_title('Función de Rosenbrock')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    
+    ax.legend()
+    plt.show()
 
-#Graficar la evolucion del descenso por gradiente
-plt.figure(figsize=(10, 6))
-plt.plot(values[0], label='Trajectory 1', color='red')
-plt.plot(values[1], label='Trajectory 2', color='blue')
-plt.plot(values[2], label='Trajectory 3', color='green')
-#plt.plot(values[10], label='Trajectory 4', color='orange')
-plt.xscale('log')
-plt.yscale('log')
-plt.grid()
-plt.title('Evolución del descenso por gradiente')
-plt.xlabel('Iteración')
-plt.ylabel('Valor de la función de Rosenbrock')
-plt.legend()
-plt.show()
 
+def main():
+    # Parámetros
+    alphas = [0.001, 0.002, 0.005]  # Tasa de aprendizaje
+    initial_points = [[-1.2, 1], [0, 0], [2, 2], [-1.5, 1.5]]  # Puntos iniciales
+
+    # Generación de gráficos
+    x_range = np.linspace(-2, 2, 400)
+    y_range = np.linspace(-1, 3, 400)
+    X, Y = np.meshgrid(x_range, y_range)
+    Z = rosenbrock(X, Y)
+
+    values , grads = plot_trajectories(initial_points, alphas, X, Y, Z)
+    plot_evolution(values)
+    plot_convergence(grads)
+    plot_rosenbrock()
+
+
+if __name__ == "__main__":
+    main()

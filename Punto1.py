@@ -88,10 +88,10 @@ print(f"Shape of values: {len(values)}")
 fig = plt.figure(figsize=(10, 6))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8)
-ax.set_title('Función de Rosenbrock y trayectoria del gradiente descendente')
-ax.set_xlabel('x')
+ax.set_title('Función de Rosenbrock')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
+
 plt.show()
 
 
