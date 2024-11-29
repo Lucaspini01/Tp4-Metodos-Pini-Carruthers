@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from scipy.linalg import svd
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 # Cargar el dataset
 housing = fetch_california_housing()
@@ -56,13 +57,13 @@ eta = 1 / sigma1**2
 
 # Inicializar parámetros
 w_grad = np.zeros(X_train.shape[1])
-iterations = 1000
+iterations = 100000
 
 # Almacenar el error en cada iteración
 train_errors_grad = []
 test_errors_grad = []
 
-for i in range(iterations):
+for i in tqdm(range(iterations)):
     # Calcular gradiente
     gradient = (2 / n_train) * X_train.T @ (X_train @ w_grad - y_train)
     # Actualizar parámetros
@@ -82,32 +83,79 @@ print(f"ECM Prueba final: {test_errors_grad[-1]:.4f}")
 
 #Comparar la solucion obtenida por la pseudoinversa con la solucion iteratica del gradiente descendente para distitos valores de eta
 
+# etas = [1 / sigma1**2, 0.1 / sigma1**2, 0.01 / sigma1**2, 0.001 / sigma1**2, 0.0001 / sigma1**2]
+# eta_labels = ['1/σ₁²', '0.1/σ₁²', '0.01/σ₁²', '0.001/σ₁²', '0.0001/σ₁²']
+
+# iterations = 1000
+# n_features = X_train.shape[1]
+
+# w_analiticos = []
+# w_gradientes = []
+
+# for eta in etas:
+#     w_analitico = np.linalg.inv(X_train.T @ X_train) @ X_train.T @ y_train
+#     w_analiticos.append(w_analitico)
+
+#     w_gradiente_decreciente = np.zeros(n_features)
+#     for _ in range(iterations):
+#         # Calcular gradiente
+#         gradient = (2 / n_train) * X_train.T @ (X_train @ w_gradiente_decreciente - y_train)
+#         # Actualizar parámetros
+#         w_gradiente_decreciente -= eta * gradient
+    
+#     w_gradientes.append(w_gradiente_decreciente.copy())
+
+# plt.figure(figsize=(14, 7))
+# for idx, eta in enumerate(etas):
+#     plt.scatter(range(len(w_analiticos[idx])), w_analiticos[idx], label=f'Analítica η = {eta_labels[idx]}')
+#     plt.plot(w_analiticos[idx], label=f'Analítica η = {eta_labels[idx]}')
+#     plt.scatter(range(len(w_gradientes[idx])), w_gradientes[idx], label=f'Gradiente η = {eta_labels[idx]}')
+#     plt.plot(w_gradientes[idx], linestyle='--', label=f'Gradiente η = {eta_labels[idx]}')
+
+# plt.xlabel('Parámetros')
+# plt.ylabel('Valor')
+# plt.title('Comparación de Parámetros: Pseudoinversa vs Gradiente Descendente')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
+
 etas = [1 / sigma1**2, 0.1 / sigma1**2, 0.01 / sigma1**2, 0.001 / sigma1**2, 0.0001 / sigma1**2]
 eta_labels = ['1/σ₁²', '0.1/σ₁²', '0.01/σ₁²', '0.001/σ₁²', '0.0001/σ₁²']
 
-iterations = 100000
+# iterations = 100000 , se usa el mismo valor de iteraciones que en el gradiente decreciente
 n_features = X_train.shape[1]
 
 w_analiticos = []
 w_gradientes = []
 
-for eta in etas:
+for eta in tqdm(etas):
     w_analitico = np.linalg.inv(X_train.T @ X_train) @ X_train.T @ y_train
     w_analiticos.append(w_analitico)
 
     w_gradiente_decreciente = np.zeros(n_features)
-    for _ in range(iterations):
+    w_gradientes_eta = []
+    for _ in tqdm(range(iterations)):
         # Calcular gradiente
         gradient = (2 / n_train) * X_train.T @ (X_train @ w_gradiente_decreciente - y_train)
         # Actualizar parámetros
         w_gradiente_decreciente -= eta * gradient
+        w_gradientes_eta.append(w_gradiente_decreciente.copy())
     
-    w_gradientes.append(w_gradiente_decreciente.copy())
+    w_gradientes.append(w_gradientes_eta)
 
 plt.figure(figsize=(14, 7))
-for idx, eta in enumerate(etas):
-    plt.plot(w_analiticos[idx], label=f'Analítica η = {eta_labels[idx]}')
-    plt.plot(w_gradientes[idx], linestyle='--', label=f'Gradiente η = {eta_labels[idx]}')
+parametros = np.arange(n_features)
+colors = ['blue', 'pink', 'green', 'red', 'purple']
+markers = ['o', 's', 'D', '^', 'v']
+
+# Graficar la solución analítica
+plt.scatter(parametros, w_analiticos[0], color='black', marker='x', label="Pseudoinversa (Analítica)", zorder=4)
+plt.plot(parametros, w_analiticos[0], color='black', linestyle='--', linewidth=1.2, alpha=0.9)
+
+# Graficar las soluciones iterativas al final de las iteraciones
+for i, w_grad_eta in enumerate(w_gradientes):
+    plt.scatter(parametros, w_grad_eta[-1], color=colors[i], marker=markers[i], label=f"Gradiente η = {eta_labels[i]}", zorder=3)
+    plt.plot(parametros, w_grad_eta[-1], color=colors[i], linestyle='--', alpha=0.8)
 
 plt.xlabel('Parámetros')
 plt.ylabel('Valor')
@@ -115,7 +163,6 @@ plt.title('Comparación de Parámetros: Pseudoinversa vs Gradiente Descendente')
 plt.legend()
 plt.grid(True)
 plt.show()
-
 #///////////////////////////////////////////////////////////
 # plt.figure(figsize=(12, 6))
 # colors = ['blue', 'pink', 'green', 'red', 'purple']  # Colores para las tasas de aprendizaje
@@ -159,7 +206,7 @@ for eta in etas:
     train_errors_grad = []
     test_errors_grad = []
 
-    for _ in range(iterations):
+    for _ in tqdm(range(iterations)):
         # Calcular gradiente
         gradient = (2 / n_train) * X_train.T @ (X_train @ w_gradiente_decreciente - y_train)
         # Actualizar parámetros
